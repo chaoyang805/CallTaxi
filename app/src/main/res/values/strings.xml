@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">CallTaxi</string>
+    <string name="action_settings">Settings</string>
+    <string name="location_failed">failed to locate</string>
+    <string name="user_name">user name</string>
+    <string name="phone_number">phone number</string>
+    <string name="login">log in</string>
+    <string name="cancel_call_taxi">cancel call taxi</string>
+    <string name="waiting">waiting for driver...</string>
+    <string name="ordered">you are being ordered by \n%1$s\nphone number:%2$s\n(click to dial)</string>
+</resources>

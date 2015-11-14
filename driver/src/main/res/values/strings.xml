@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Driver</string>
+    <string name="action_settings">Settings</string>
+    <string name="user_name">user name</string>
+    <string name="phone_number">phone number</string>
+    <string name="login">login</string>
+</resources>
