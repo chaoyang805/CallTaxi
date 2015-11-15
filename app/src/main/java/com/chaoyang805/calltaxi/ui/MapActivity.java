@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.baidu.location.BDLocation;
+import com.baidu.location.Poi;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.DistanceUtil;
@@ -25,11 +26,14 @@ import com.chaoyang805.calltaxi.service.TaxiSocketService;
 import com.chaoyang805.calltaxi.utils.LogHelper;
 import com.chaoyang805.calltaxi.utils.ToastUtils;
 
+import java.util.List;
+
 public class MapActivity extends AppCompatActivity
         implements BaiduMapManager.OnLocationUpdateListener, View.OnClickListener {
     private static final String TAG = LogHelper.makeLogTag(MapActivity.class);
 
     private static final int REQUEST_GET_DEST = 0x1001;
+    private static final int REQUEST_WAITING_ORDER = 0x1002;
 
     public static final String EXTRA_CITY = "extra_city";
     public static final String EXTRA_DEST = "destination_key";
@@ -72,6 +76,11 @@ public class MapActivity extends AppCompatActivity
                     public void onUpdateDriver(String msg) {
                         updateDriver(msg);
                     }
+
+                    @Override
+                    public void onDriverOffline(String message) {
+                        driverOffline(message);
+                    }
                 };
                 mServiceBinder = (TaxiSocketService.TaxiSocketServiceBinder) service;
                 mServiceBinder.setOnDriverUpdateCallback(callback);
@@ -79,13 +88,19 @@ public class MapActivity extends AppCompatActivity
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                LogHelper.d(TAG, "onServiceDisconnected");
+                mServiceBinder.removeCallback();
+                mServiceBinder = null;
             }
         };
         Intent intent = new Intent(this,TaxiSocketService.class);
         intent.putExtra(LoginActivity.EXTRA_NAME, name);
         intent.putExtra(LoginActivity.EXTRA_PHONE_NUMBER, phoneNumber);
         bindService(intent, mSocketServiceConnection, BIND_AUTO_CREATE);
+    }
+
+    private void driverOffline(String msg) {
+        Message message = new Message(msg);
+        mMapManager.removeDriver(message.getDriverPhoneNumber());
     }
 
     private void updateDriver(String msg) {
@@ -114,6 +129,9 @@ public class MapActivity extends AppCompatActivity
     @Override
     public void onLocationUpdate(BDLocation bdLocation) {
         mCity = bdLocation.getCity();
+        List<Poi> poiList = bdLocation.getPoiList();
+        Poi poi = poiList.get(0);
+
         mCurrentLat = bdLocation.getLatitude();
         mCurrentLng = bdLocation.getLongitude();
         if (mServiceBinder != null) {
@@ -139,9 +157,10 @@ public class MapActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-        mMapManager.onDestroy();
         unbindService(mSocketServiceConnection);
+        mMapManager.onDestroy();
+        mSocketServiceConnection = null;
+        super.onDestroy();
     }
 
     @Override
@@ -173,7 +192,7 @@ public class MapActivity extends AppCompatActivity
                         new LatLng(mDestLocation[0], mDestLocation[1]));
                 destination.setDistance(distance);
                 mServiceBinder.callTaxi(destination);
-                startActivity(new Intent(MapActivity.this, WaitingActivity.class));
+                startActivityForResult(new Intent(MapActivity.this, WaitingActivity.class), REQUEST_WAITING_ORDER);
                 break;
         }
     }
@@ -184,12 +203,23 @@ public class MapActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
-            if (data != null) {
-                mDestAdress = data.getStringExtra(EXTRA_DEST);
-                mBtnDestInPut.setText("目的地：" + mDestAdress);
-                mDestLocation[0] = data.getDoubleExtra(EXTRA_LATITUDE,-1);
-                mDestLocation[1] = data.getDoubleExtra(EXTRA_LONGITUDE, -1);
+            switch (requestCode) {
+                case REQUEST_GET_DEST:
+                    if (data != null) {
+                        mDestAdress = data.getStringExtra(EXTRA_DEST);
+                        mBtnDestInPut.setText("目的地：" + mDestAdress);
+                        mDestLocation[0] = data.getDoubleExtra(EXTRA_LATITUDE, -1);
+                        mDestLocation[1] = data.getDoubleExtra(EXTRA_LONGITUDE, -1);
+                    }
+                    break;
+                case REQUEST_WAITING_ORDER:
+                    if (mServiceBinder != null) {
+                        LogHelper.d(TAG, "passenger login again");
+                        mServiceBinder.passengerLogin();
+                    }
+                    break;
             }
+
         }
     }
 

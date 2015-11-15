@@ -52,6 +52,7 @@ public class TaxiSocketService extends Service {
                     @Override
                     public void onDriverAccept(String msg) {
                         super.onDriverAccept(msg);
+                        LogHelper.d(TAG,"onDriverAccept");
                         Message message = new Message(msg);
                         Intent intent = new Intent(WaitingActivity.TaxiOrderReceiver.ACTION_DRIVER_ACCEPT);
                         intent.putExtra(EXTRA_DRIVER_NAME,message.getDriverName());
@@ -65,6 +66,13 @@ public class TaxiSocketService extends Service {
                             mCallback.onUpdateDriver(message);
                         }
                     }
+
+                    @Override
+                    public void onDriverOffline(String message) {
+                        if (mCallback != null){
+                            mCallback.onDriverOffline(message);
+                        }
+                    }
                 });
             }
         });
@@ -73,19 +81,12 @@ public class TaxiSocketService extends Service {
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        LogHelper.d(TAG, "service onCreate");
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        LogHelper.d(TAG, "service OnstartCommand");
-        return super.onStartCommand(intent, flags, startId);
-    }
-    @Override
     public void onDestroy() {
         super.onDestroy();
+        disconnect();
+    }
+
+    private void disconnect() {
         mSocketClient.disconnect();
     }
 
@@ -97,6 +98,10 @@ public class TaxiSocketService extends Service {
 
         public void setOnDriverUpdateCallback(OnDriverUpdateCallback callback) {
             mCallback = callback;
+        }
+
+        public void removeCallback(){
+            mCallback = null;
         }
 
         public void updateLocation(double[] location){

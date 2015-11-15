@@ -9,5 +9,5 @@ public class OnMessageReceivedListenerAdapter implements OnMessageReceivedListen
     @Override
     public void onDriverAccept(String message) {}
     @Override
-    public void onSessionClosed(){}
+    public void onDriverOffline(String detail) {}
 }

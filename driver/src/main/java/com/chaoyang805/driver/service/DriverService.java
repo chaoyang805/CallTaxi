@@ -65,6 +65,13 @@ public class DriverService extends Service {
                             mCallback.onPassengerCancel(message);
                         }
                     }
+
+                    @Override
+                    public void onPassengerOffline(String message) {
+                        if (mCallback != null){
+                            mCallback.onPassengerOffline(message);
+                        }
+                    }
                 });
             }
         });
@@ -74,8 +81,11 @@ public class DriverService extends Service {
 
     @Override
     public void onDestroy() {
+        disconnect();
         super.onDestroy();
+    }
 
+    private void disconnect() {
         mSocketClient.disconnect();
     }
 

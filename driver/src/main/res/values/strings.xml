@@ -4,4 +4,7 @@
     <string name="user_name">user name</string>
     <string name="phone_number">phone number</string>
     <string name="login">login</string>
+    <string name="call_passenger">Call Passenger</string>
+    <string name="passenger_info">Ordered successful!\n\nPassenger:%1$s\nPhone:%2$s\nDestination:%3$s %4$dkm\nDistance from me:%5$dm</string>
+    <string name="complete">complete</string>
 </resources>

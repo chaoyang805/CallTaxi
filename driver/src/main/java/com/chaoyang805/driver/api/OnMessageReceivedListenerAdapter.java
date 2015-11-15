@@ -14,5 +14,8 @@ public class OnMessageReceivedListenerAdapter implements OnMessageReceivedListen
     @Override
     public void onPassengerCancel(String message) {}
 
+    @Override
+    public void onPassengerOffline(String message) {}
+
 
 }

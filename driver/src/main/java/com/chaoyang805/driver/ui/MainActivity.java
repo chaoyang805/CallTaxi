@@ -1,6 +1,9 @@
 package com.chaoyang805.driver.ui;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -27,6 +30,7 @@ import com.chaoyang805.driver.utils.LogHelper;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
     private static final String TAG = LogHelper.makeLogTag(MainActivity.class);
+    private static final int REQUEST_TAKE_ORDER = 0x1000;
 
     private ServiceConnection mServiceConnection;
 
@@ -66,47 +70,22 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 DriverServiceCallback callback = new DriverServiceCallback() {
                     @Override
                     public void onUpdatePassenger(String msg) {
-                        Message message = new Message(msg);
-                        final Passenger passenger = new Passenger(message.getPassengerName(), message.getPassengerPhoneNumber());
-                        passenger.setDestination(message.getDestination());
-                        passenger.setLocation(message.getLocation());
-                        LatLng passengerLocation = new LatLng(passenger.getLocation()[0], passenger.getLocation()[1]);
-                        //乘客和司机间的距离
-                        int distance = (int) DistanceUtil.getDistance(passengerLocation, new LatLng(mCurrentLocation[0], mCurrentLocation[1]));
-
-                        LogHelper.d(TAG, "distance = " + distance + "passengerLoc:" + passenger.getLocation()[0] + " " +
-                                passenger.getLocation()[1] + " driverLoc :" + mCurrentLocation[0] + " " + mCurrentLocation[1]);
-                        passenger.setDistance(distance);
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mAdapter.updatePassenger(passenger);
-                            }
-                        });
+                        updatePassenger(msg);
                     }
 
                     @Override
                     public void onPassengerTaken(String msg) {
-                        Message message = new Message(msg);
-                        final Passenger passenger = new Passenger(message.getPassengerName(), message.getPassengerPhoneNumber());
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mAdapter.passengerTaken(passenger);
-                            }
-                        });
+                        passengerTaken(msg);
                     }
 
                     @Override
                     public void onPassengerCancel(String msg) {
-                        Message message = new Message(msg);
-                        final Passenger passenger = new Passenger(message.getPassengerName(), message.getPassengerPhoneNumber());
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mAdapter.passengerCancel(passenger);
-                            }
-                        });
+                        passengerCancel(msg);
+                    }
+
+                    @Override
+                    public void onPassengerOffline(String msg) {
+                        passengerOffline(msg);
                     }
                 };
                 mBinder.addCallback(callback);
@@ -118,6 +97,60 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         };
         bindService(service, mServiceConnection, BIND_AUTO_CREATE);
+    }
+
+    private void passengerOffline(String msg) {
+        Message message = new Message(msg);
+        final Passenger passenger = new Passenger(message.getPassengerName(), message.getPassengerPhoneNumber());
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.removePassenger(passenger);
+            }
+        });
+
+    }
+
+    private void passengerCancel(String msg) {
+        Message message = new Message(msg);
+        final Passenger passenger = new Passenger(message.getPassengerName(), message.getPassengerPhoneNumber());
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.removePassenger(passenger);
+            }
+        });
+    }
+
+    private void passengerTaken(String msg) {
+        Message message = new Message(msg);
+        final Passenger passenger = new Passenger(message.getPassengerName(), message.getPassengerPhoneNumber());
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.removePassenger(passenger);
+            }
+        });
+    }
+
+    private void updatePassenger(String msg) {
+        Message message = new Message(msg);
+        final Passenger passenger = new Passenger(message.getPassengerName(), message.getPassengerPhoneNumber());
+        passenger.setDestination(message.getDestination());
+        passenger.setLocation(message.getLocation());
+        LatLng passengerLocation = new LatLng(passenger.getLocation()[0], passenger.getLocation()[1]);
+        //乘客和司机间的距离
+        int distance = (int) DistanceUtil.getDistance(passengerLocation, new LatLng(mCurrentLocation[0], mCurrentLocation[1]));
+
+        LogHelper.d(TAG, "distance = " + distance + "passengerLoc:" + passenger.getLocation()[0] + " " +
+                passenger.getLocation()[1] + " driverLoc :" + mCurrentLocation[0] + " " + mCurrentLocation[1]);
+        passenger.setDistance(distance);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.updatePassenger(passenger);
+            }
+        });
     }
 
     private void initViews() {
@@ -146,14 +179,53 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        LogHelper.d(TAG, "onStop");
+    }
+
+    @Override
     protected void onDestroy() {
-        super.onDestroy();
         unbindService(mServiceConnection);
         mLocationManager.stop();
+        super.onDestroy();
+        LogHelper.d(TAG, "onDestory");
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        //TODO show alert dialog
+        final Passenger passenger = mAdapter.getItem(position);
+        final String name = passenger.getName();
+        final String phoneNumber = passenger.getPhoneNumber();
+        final String adress = passenger.getDestination().getDetailAdress();
+        final int destDistance = (int) passenger.getDestination().getDistance() / 1000;
+        final int distance = passenger.getDistance();
+        new AlertDialog.Builder(this)
+                .setTitle("是否接单？")
+                .setMessage(String.format("乘客：%s\n手机号：%s\n目的地：%s %d\n",
+                        name, phoneNumber, adress, destDistance))
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mBinder.driverAccept(passenger, mCurrentLocation);
+                        Intent intent = new Intent(MainActivity.this, PassengerInfoActivity.class);
+                        intent.putExtra(LoginActivity.EXTRA_NAME, name);
+                        intent.putExtra(LoginActivity.EXTRA_PHONE_NUMBER, phoneNumber);
+                        intent.putExtra(LoginActivity.EXTRA_ADRESS, adress);
+                        intent.putExtra(LoginActivity.EXTRA_DEST_DISTANCE, destDistance);
+                        intent.putExtra(LoginActivity.EXTRA_DISTANCE, distance);
+                        startActivityForResult(intent, REQUEST_TAKE_ORDER);
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == REQUEST_TAKE_ORDER && resultCode == Activity.RESULT_OK){
+
+        }
     }
 }

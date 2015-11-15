@@ -9,4 +9,6 @@
     <string name="cancel_call_taxi">取消约车</string>
     <string name="waiting">正在等待司机接单...</string>
     <string name="ordered">已经有司机接单了\n司机：%1$s\n手机号%2$s\n(点击进行呼叫)</string>
+    <string name="done">完成</string>
+    <string name="call_him">打电话给他</string>
 </resources>

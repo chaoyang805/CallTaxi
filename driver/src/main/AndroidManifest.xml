@@ -43,6 +43,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <activity android:name=".ui.PassengerInfoActivity"/>
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"

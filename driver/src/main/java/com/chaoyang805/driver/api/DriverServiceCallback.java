@@ -10,4 +10,6 @@ public interface DriverServiceCallback {
     void onPassengerTaken(String msg);
 
     void onPassengerCancel(String msg);
+
+    void onPassengerOffline(String msg);
 }

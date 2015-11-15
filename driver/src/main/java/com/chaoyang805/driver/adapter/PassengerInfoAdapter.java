@@ -41,16 +41,7 @@ public class PassengerInfoAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-    public void passengerTaken(Passenger passenger) {
-        if (mPassengerNumbers.contains(passenger.getPhoneNumber())) {
-            int position = mPassengerNumbers.indexOf(passenger.getPhoneNumber());
-            mPassengers.remove(position);
-            mPassengerNumbers.remove(position);
-            notifyDataSetChanged();
-        }
-    }
-
-    public void passengerCancel(Passenger passenger) {
+    public void removePassenger(Passenger passenger) {
         if (mPassengerNumbers.contains(passenger.getPhoneNumber())) {
             int position = mPassengerNumbers.indexOf(passenger.getPhoneNumber());
             mPassengers.remove(position);
@@ -94,6 +85,7 @@ public class PassengerInfoAdapter extends BaseAdapter {
         holder.tvDestination.setText(passenger.getDestination().getDetailAdress() + " " + destDistance + "km");
         return convertView;
     }
+
 
     static class ViewHolder {
         TextView tvName;

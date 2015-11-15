@@ -26,6 +26,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     public static final String EXTRA_PHONE_NUMBER = "extra_phone_number";
 
+    public static final String EXTRA_ADRESS = "extra_adress";
+    public static final String EXTRA_DISTANCE = "extra_distance";
+    public static final String EXTRA_DEST_DISTANCE = "extra_dest_distance";
+
     private EditText mEtName;
 
     private EditText mEtPhoneNumber;

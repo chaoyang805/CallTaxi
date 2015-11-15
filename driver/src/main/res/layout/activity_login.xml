@@ -5,8 +5,8 @@
     android:layout_height="match_parent">
     <TextView
         android:gravity="center"
-        android:text="欢迎使用打车软件"
-        android:textSize="30sp"
+        android:text="欢迎使用打车软件司机端"
+        android:textSize="28sp"
         android:layout_width="match_parent"
         android:layout_height="240dp"/>
 

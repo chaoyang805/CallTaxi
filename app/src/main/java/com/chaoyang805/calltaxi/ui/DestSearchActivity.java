@@ -19,13 +19,14 @@ import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.chaoyang805.calltaxi.R;
 import com.chaoyang805.calltaxi.adapter.SuggestionInfoAdapter;
+import com.chaoyang805.calltaxi.utils.ToastUtils;
 
 import java.util.List;
 
 /**
  * Created by chaoyang805 on 2015/11/8.
  */
-public class DestSearchActivity  extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener, OnGetSuggestionResultListener {
+public class DestSearchActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener, OnGetSuggestionResultListener {
 
     private EditText mEtInputDest;
 
@@ -38,6 +39,7 @@ public class DestSearchActivity  extends AppCompatActivity implements View.OnCli
     private SuggestionSearch mSuggestionSearch;
 
     private String mCity;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,9 +61,11 @@ public class DestSearchActivity  extends AppCompatActivity implements View.OnCli
                         .keyword(s.toString())
                         .city(getIntent().getStringExtra(MapActivity.EXTRA_CITY)));
             }
+
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
+
             @Override
             public void afterTextChanged(Editable s) {
             }
@@ -83,14 +87,16 @@ public class DestSearchActivity  extends AppCompatActivity implements View.OnCli
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         SuggestionResult.SuggestionInfo suggestionInfo = mAdapter.getItem(position);
-        Log.d("TAG", "suggestionInfo.key:" + suggestionInfo.key + "\nsuggestionInfo.city:" + suggestionInfo.city + "\n" +
-                "suggestionInfo.district:" + suggestionInfo.district + "\nsuggestionInfo.describeContents:" + suggestionInfo.describeContents());
-        Intent result = new Intent();
-        result.putExtra(MapActivity.EXTRA_DEST,suggestionInfo.key);
-        result.putExtra(MapActivity.EXTRA_LATITUDE,suggestionInfo.pt.latitude);
-        result.putExtra(MapActivity.EXTRA_LONGITUDE,suggestionInfo.pt.longitude);
-        setResult(Activity.RESULT_OK, result);
-        finish();
+        if (suggestionInfo != null) {
+            Intent result = new Intent();
+            result.putExtra(MapActivity.EXTRA_DEST, suggestionInfo.key);
+            result.putExtra(MapActivity.EXTRA_LATITUDE, suggestionInfo.pt.latitude);
+            result.putExtra(MapActivity.EXTRA_LONGITUDE, suggestionInfo.pt.longitude);
+            setResult(Activity.RESULT_OK, result);
+            finish();
+        }else {
+            ToastUtils.showToast(this,"搜索出错了，选别的试试吧");
+        }
     }
 
     @Override

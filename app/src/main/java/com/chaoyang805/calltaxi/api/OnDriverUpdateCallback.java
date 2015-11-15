@@ -6,4 +6,6 @@ package com.chaoyang805.calltaxi.api;
 public interface OnDriverUpdateCallback {
 
     void onUpdateDriver(String msg);
+
+    void onDriverOffline(String message);
 }

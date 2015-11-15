@@ -15,7 +15,7 @@ public class LocationManager {
 
     private LocationClient mLocationClient;
 
-    private int mScanSpanInMillis = 3000;
+    private int mScanSpanInMillis = 10000;
 
     private DriverLocationListener mLocationListener;
 

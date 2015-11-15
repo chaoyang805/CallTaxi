@@ -2,11 +2,10 @@
 <resources>
     <string name="action_settings">设置</string>
     <string name="app_name">打车司机端</string>
-    <string name="location_failed">定位失败</string>
     <string name="phone_number">手机号</string>
     <string name="user_name">用户名</string>
     <string name="login">登录</string>
-    <string name="cancel_call_taxi">取消约车</string>
-    <string name="waiting">正在等待司机接单...</string>
-    <string name="ordered">已经有司机接单了\n司机：%1$s\n手机号%2$s\n(点击进行呼叫)</string>
+    <string name="call_passenger">打电话给他</string>
+    <string name="passenger_info">接单成功！\n\n乘客：%1$s\n电话：%2$s\n目的地：%3$s %4$dkm\n距离我：%5$dm</string>
+    <string name="complete">完成订单</string>
 </resources>

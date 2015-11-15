@@ -9,5 +9,5 @@ public interface OnMessageReceivedListener {
 
     void onDriverAccept(String message);
 
-    void onSessionClosed();
+    void onDriverOffline(String detail);
 }

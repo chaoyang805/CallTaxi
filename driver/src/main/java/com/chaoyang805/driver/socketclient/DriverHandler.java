@@ -48,7 +48,9 @@ public class DriverHandler extends IoHandlerAdapter {
                 }
                 break;
             case "passenger_offline":
-                //TODO passenger offline remove this passenger from listview
+                if (mListener != null) {
+                    mListener.onPassengerOffline(detail);
+                }
                 break;
             default:
                 LogHelper.d(TAG, "unknown request type:" + requestType);

@@ -8,4 +8,6 @@
     <string name="cancel_call_taxi">cancel call taxi</string>
     <string name="waiting">waiting for driver...</string>
     <string name="ordered">you are being ordered by \n%1$s\nphone number:%2$s\n(click to dial)</string>
+    <string name="done">done</string>
+    <string name="call_him">call him</string>
 </resources>

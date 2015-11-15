@@ -139,14 +139,14 @@ public class DriverSocketClient {
     public void driverAccept(Passenger passenger,double[] location) {
         String type = "driver_accept";
         Message msg = new Message.MessageBuilder()
-                .setRequestType("driver_accept")
+                .setRequestType(type)
                 .setDriverName(mName)
                 .setDriverPhoneNumber(mPhoneNumber)
                 .setPassengerName(passenger.getName())
                 .setPassengerPhoneNumber(passenger.getPhoneNumber())
                 .setLocation(location)
                 .build();
-
+        sendMessage(msg);
     }
 
 
@@ -157,6 +157,12 @@ public class DriverSocketClient {
         LogHelper.d(TAG, "disconect");
         mCallback = null;
         if (mSession != null && isConnected) {
+            Message msg = new Message.MessageBuilder()
+                    .setRequestType("disconnect")
+                    .setDriverName(mName)
+                    .setDriverPhoneNumber(mPhoneNumber)
+                    .build();
+            sendMessage(msg);
             mSession.close(true);
             mConnector.dispose();
         }

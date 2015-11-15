@@ -90,9 +90,12 @@ public class BaiduMapManager implements BDLocationListener {
                 (MyLocationConfiguration.LocationMode.FOLLOWING, true, null);
         mBaiduMap.setMyLocationConfigeration(config);
         mClient = new LocationClient(mContext);
+
         mClient.registerLocationListener(this);
         //配置mClient对象的参数信息
         LocationClientOption option = new LocationClientOption();
+
+        option.setIsNeedLocationPoiList(true);
         //设置扫描间隔为5min
         option.setScanSpan(mScanSpanMillis);
         //开启GPS
@@ -131,8 +134,10 @@ public class BaiduMapManager implements BDLocationListener {
     private int mFailureCount = 0;
 
     private MyLocationData mLocationData;
+
     /**
      * 定位返回数据的回调
+     *
      * @param bdLocation
      */
     @Override
@@ -156,8 +161,6 @@ public class BaiduMapManager implements BDLocationListener {
                     .build();
             if (isFirstLocate) {
                 mBaiduMap.setMyLocationData(mLocationData);
-//                MapStatusUpdate msu = MapStatusUpdateFactory.newLatLng(latLng);
-//                mBaiduMap.animateMapStatus(msu);
                 isFirstLocate = false;
             }
             //我的位置得到了更新，将我的最新位置信息发送给服务器
@@ -197,7 +200,7 @@ public class BaiduMapManager implements BDLocationListener {
     public void showDriversOnMap(Driver driver) {
         Marker marker;
         //如果传入的司机的位置还没显示在地图上，则先显示在地图上
-        if (!mMarkers.containsKey(driver.getPhoneNumber())) {
+        if (!containsDriver(driver)) {
             //添加用户对应的marker到地图上
             addNewMarker(driver);
         } else {
@@ -213,7 +216,7 @@ public class BaiduMapManager implements BDLocationListener {
         BitmapDescriptor bd = BitmapDescriptorFactory.fromResource(R.mipmap.ic_marker_taxi_18dp);
         OverlayOptions overlayOptions = new MarkerOptions().position(driver.getLatLng()).title(driver.getName()).icon(bd);
         marker = (Marker) mBaiduMap.addOverlay(overlayOptions);
-        mMarkers.put(driver.getName(), marker);
+        mMarkers.put(driver.getPhoneNumber(), marker);
     }
 
     /**
@@ -228,11 +231,14 @@ public class BaiduMapManager implements BDLocationListener {
 
     /**
      * 移除掉已经离线的司机的marker
+     *
      * @param phoneNumber
      */
     public void removeDriver(String phoneNumber) {
         //分别从地图和mMarkers中移除marker。
-        mMarkers.remove(phoneNumber).remove();
+        if (mMarkers.containsKey(phoneNumber)) {
+            mMarkers.remove(phoneNumber).remove();
+        }
     }
 
     /**

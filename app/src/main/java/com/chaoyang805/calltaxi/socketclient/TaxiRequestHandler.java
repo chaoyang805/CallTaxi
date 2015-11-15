@@ -43,7 +43,9 @@ public class TaxiRequestHandler extends IoHandlerAdapter {
                 }
                 break;
             case "driver_offline":
-                //TODO driver is offline,remove the driver's marker from baidu mapview
+                if (mListener != null){
+                    mListener.onDriverOffline(detail);
+                }
                 break;
             default:
                 LogHelper.d(TAG, "unknown request type:" + requestType);

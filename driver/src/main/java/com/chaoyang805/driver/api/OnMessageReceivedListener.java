@@ -11,4 +11,6 @@ public interface OnMessageReceivedListener {
 
     void onPassengerCancel(String message);
 
+    void onPassengerOffline(String message);
+
 }
